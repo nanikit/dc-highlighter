@@ -198,16 +198,40 @@ async function request(url) {
         xhr.send();
     });
 }
-async function getTunedPrismCss() {
-    let css = await request("./static/prism.css");
-    const problematic = "Monaco, 'Andale Mono', 'Ubuntu Mono'";
-    const removeQuote = "나눔고딕코딩, D2Coding";
-    css = css.replace(problematic, removeQuote);
-    css = css.replace("font-size: 1em;", "font-size: 0.8rem;");
-    return css;
+function getSelectedHtmlAsDiv() {
+    if (!window.getSelection) {
+        return;
+    }
+    const selection = window.getSelection();
+    const div = document.createElement('div');
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const clonedSelection = range.cloneContents();
+        div.appendChild(clonedSelection);
+    }
+    return div;
+}
+function rewrapForStyle(div) {
+    const tagName = div.textContent.includes("\n") ? "div" : "span";
+    const container = document.createElement(tagName);
+    container.className = pre.className;
+    container.style.cssText = pre.style.cssText;
+    while (div.childNodes.length > 0) {
+        container.appendChild(div.childNodes[0]);
+    }
+    return container;
+}
+function hookCopyEvent() {
+    pre.addEventListener("copy", e => {
+        const div = getSelectedHtmlAsDiv();
+        const container = rewrapForStyle(div);
+        e.clipboardData.setData("text/plain", container.textContent);
+        e.clipboardData.setData("text/html", container.outerHTML);
+        e.preventDefault();
+    });
 }
 async function bindGenerator() {
-    let css = await getTunedPrismCss();
+    let css = await request("./static/prism.css");
     reflectInput = () => {
         const code = document.getElementById("code");
         code.textContent = input.value === "" ? " " : input.value;
@@ -216,6 +240,7 @@ async function bindGenerator() {
         pre.innerHTML = juice.inlineContent(entitied, css);
     };
     input.addEventListener("input", reflectInput);
+    reflectInput();
 }
 function bindLanguages() {
     const selectLang = document.getElementById("language");
@@ -236,5 +261,7 @@ function initialize() {
     prism.plugins.autoloader.languages_path = "./components/";
     bindGenerator();
     bindLanguages();
+    hookCopyEvent();
 }
 initialize();
+//# sourceMappingURL=index.js.map

@@ -11,11 +11,15 @@
 
 <body class="grid">
   <h1>디씨인사이드 복붙가능 코드블록 생성기</h1>
-  <textarea id="edit">void bottom() { bottom(); }</textarea>
+  <textarea id="edit">int main(int argc) {
+  return argc - 1;
+}</textarea>
   <div>
     <select id="language"></select>
   </div>
-  <pre id="pre"><code id="code" class="language-cpp">void bottom() { bottom(); }</code></pre>
+  <pre id="pre"><code id="code" class="language-cpp">int main(int argc) {
+  return argc - 1;
+}</code></pre>
   <footer>
     <p>Powered by <a href="https://prismjs.com">prism.js</a>, presented by nanikit</p>
   </footer>

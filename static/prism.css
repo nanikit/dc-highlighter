@@ -8,10 +8,9 @@ https://prismjs.com/download.html#themes=prism-coy&languages=markup+css+clike+ja
 
 code[class*="language-"],
 pre[class*="language-"] {
-	color: black;
 	background: none;
-	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-	font-size: 1em;
+	font-family: Consolas, 나눔고딕코딩, D2Coding, monospace;
+	font-size: 0.8rem;
 	text-align: left;
 	white-space: pre;
 	word-spacing: normal;
