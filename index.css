@@ -7,16 +7,35 @@
 }
 
 body {
-  font-family: 나눔고딕,나눔바른고딕,'맑은 고딕',sans-serif;
+  background: #f9faff;
+  font-family: 나눔고딕, 나눔바른고딕, '맑은 고딕', sans-serif;
   grid-template-rows: 1fr 30vh;
   padding: 0 5%;
 }
 
+#options {
+  display: flex;
+}
+
 #language {
-  margin: 8px 0 0 0;
+  border-radius: 0.4rem;
+  border-width: 1px;
   font-size: 1.5rem;
   font-weight: bold;
-  border-radius: 0.4rem;
+}
+
+#copyBtn {
+  border: #4a56a8 solid 1px;
+  background: white;
+  margin: 0 1rem;
+}
+
+#copyBtn:hover {
+  border: #ffae00 solid 1px;
+}
+
+#copyBtn:active {
+  background: #ffae00;
 }
 
 h1,
@@ -29,4 +48,5 @@ footer {
   border: #4a56a8 solid 1px;
   font-family: Consolas, 나눔고딕코딩, D2Coding, monospace;
   width: 100%;
+  margin: 0 0 6px 0;
 }

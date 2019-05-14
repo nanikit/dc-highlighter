@@ -177,11 +177,15 @@ const languages = [
     ["XQuery", "xquery"],
     ["YAML", "yaml, yml"],
 ];
-const input = document.getElementById("edit");
-const pre = document.getElementById("pre");
 const juice = window.juice;
 const prism = window.Prism;
+const input = document.getElementById("edit");
+const copyBtn = document.getElementById("copyBtn");
+const pre = document.getElementById("pre");
 let reflectInput = () => { };
+function getCodeElem() {
+    return document.getElementById("code");
+}
 function replaceWithNumEntity(html) {
     let buf = html;
     buf = buf.replace(/&lt;/g, "&#60;");
@@ -203,40 +207,38 @@ function getSelectedHtmlAsDiv() {
         return;
     }
     const selection = window.getSelection();
-    const div = document.createElement('div');
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const clonedSelection = range.cloneContents();
-        div.appendChild(clonedSelection);
+    if (selection.rangeCount === 0) {
+        return;
     }
+    const range = selection.getRangeAt(0);
+    const clonedSelection = range.cloneContents();
+    const div = document.createElement('div');
+    div.appendChild(clonedSelection);
     return div;
 }
 function rewrapForStyle(div) {
-    const tagName = div.textContent.includes("\n") ? "div" : "span";
-    const container = document.createElement(tagName);
-    container.className = pre.className;
-    container.style.cssText = pre.style.cssText;
+    if (div.firstElementChild && div.firstElementChild.tagName === "CODE") {
+        return div.firstElementChild;
+    }
+    const container = document.createElement("code");
+    const existing = getCodeElem();
+    container.className = existing.className;
+    container.style.cssText = existing.style.cssText;
     while (div.childNodes.length > 0) {
         container.appendChild(div.childNodes[0]);
     }
     return container;
 }
-function hookCopyEvent() {
-    pre.addEventListener("copy", e => {
-        const div = getSelectedHtmlAsDiv();
-        const container = rewrapForStyle(div);
-        e.clipboardData.setData("text/plain", container.textContent);
-        e.clipboardData.setData("text/html", container.outerHTML);
-        e.preventDefault();
-    });
+function getDCSafeHtml() {
+    const code = getCodeElem();
+    code.textContent = input.value === "" ? " " : input.value;
+    prism.highlightElement(code);
+    return replaceWithNumEntity(pre.innerHTML);
 }
 async function bindGenerator() {
     let css = await request("./static/prism.css");
     reflectInput = () => {
-        const code = document.getElementById("code");
-        code.textContent = input.value === "" ? " " : input.value;
-        prism.highlightElement(code);
-        const entitied = replaceWithNumEntity(pre.innerHTML);
+        const entitied = getDCSafeHtml();
         pre.innerHTML = juice.inlineContent(entitied, css);
     };
     input.addEventListener("input", reflectInput);
@@ -252,16 +254,38 @@ function bindLanguages() {
     }
     selectLang.addEventListener("change", function () {
         const name = this.value.split(",")[0];
-        const code = document.getElementById("code");
+        const code = getCodeElem();
         code.className = "language-" + name;
         reflectInput();
     });
+}
+function copyEventHandler(ev) {
+    const div = getSelectedHtmlAsDiv();
+    if (!div) {
+        return;
+    }
+    const container = rewrapForStyle(div);
+    ev.clipboardData.setData("text/plain", container.textContent);
+    ev.clipboardData.setData("text/html", container.outerHTML);
+    ev.preventDefault();
+}
+function copyBtnHandler() {
+    const range = document.createRange();
+    const code = getCodeElem();
+    range.setStartBefore(code);
+    range.setEndAfter(code);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.execCommand("copy");
+    selection.removeAllRanges();
 }
 function initialize() {
     prism.plugins.autoloader.languages_path = "./components/";
     bindGenerator();
     bindLanguages();
-    hookCopyEvent();
+    pre.addEventListener("copy", copyEventHandler);
+    copyBtn.addEventListener("click", copyBtnHandler);
 }
 initialize();
 //# sourceMappingURL=index.js.map
