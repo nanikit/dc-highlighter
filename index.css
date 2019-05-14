@@ -1,0 +1,36 @@
+﻿* {
+  box-sizing: border-box;
+}
+
+.grid {
+  display: grid;
+}
+
+#pre {
+  font-family: Consolas, 나눔고딕코딩, D2Coding, monospace;
+  font-size: 0.8rem;
+}
+
+body {
+  font-family: 나눔고딕,나눔바른고딕,'맑은 고딕',sans-serif;
+  grid-template-rows: 1fr 30vh;
+  padding: 0 5%;
+}
+
+#language {
+  margin: 8px 0 0 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 0.4rem;
+}
+
+h1,
+footer {
+  color: #4a56a8;
+  text-align: center;
+}
+
+#edit {
+  border: #4a56a8 solid 1px;
+  width: 100%;
+}
