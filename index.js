@@ -241,7 +241,9 @@ function rewrapForStyle(div) {
     const container = document.createElement("code");
     const existing = getCodeElem();
     container.className = existing.className;
-    container.style.cssText = existing.style.cssText;
+    let cssText = existing.style.cssText;
+    cssText = cssText.replace(/color\s*:\s*black\s*;/g, "color: initial;");
+    container.style.cssText = cssText;
     while (div.childNodes.length > 0) {
         container.appendChild(div.childNodes[0]);
     }
@@ -287,7 +289,6 @@ function bindThemes() {
     const selectTheme = document.getElementById("theme");
     async function reflectTheme() {
         let css = await request("./themes/" + selectTheme.value);
-        css = css.replace(/color\s*:\s*black\s*;/g, "color: initial;");
         css += superCss;
         themeCss.innerHTML = css;
         reflectInput();
