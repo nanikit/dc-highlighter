@@ -177,12 +177,29 @@ const languages = [
     ["XQuery", "xquery"],
     ["YAML", "yaml, yml"],
 ];
+const themes = [
+    "prism.css",
+    "prism-coy.css",
+    "prism-dark.css",
+    "prism-funky.css",
+    "prism-okaidia.css",
+    "prism-solarizedlight.css",
+    "prism-tomorrow.css",
+    "prism-twilight.css",
+];
+const superCss = `
+#pre, #code {
+  font-family: Consolas, 나눔고딕코딩, D2Coding, monospace;
+  font-size: 0.8rem;
+}`;
 const juice = window.juice;
 const prism = window.Prism;
-const input = document.getElementById("edit");
-const copyBtn = document.getElementById("copyBtn");
-const pre = document.getElementById("pre");
-let reflectInput = () => { };
+const themeCss = document.getElementById("themeCss");
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+function getPreElem() {
+    return document.getElementById("pre");
+}
 function getCodeElem() {
     return document.getElementById("code");
 }
@@ -212,13 +229,14 @@ function getSelectedHtmlAsDiv() {
     }
     const range = selection.getRangeAt(0);
     const clonedSelection = range.cloneContents();
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.appendChild(clonedSelection);
     return div;
 }
 function rewrapForStyle(div) {
-    if (div.firstElementChild && div.firstElementChild.tagName === "CODE") {
-        return div.firstElementChild;
+    const preElems = div.getElementsByTagName("pre");
+    if (preElems.length > 0) {
+        return preElems[0];
     }
     const container = document.createElement("code");
     const existing = getCodeElem();
@@ -230,17 +248,23 @@ function rewrapForStyle(div) {
     return container;
 }
 function getDCSafeHtml() {
+    return replaceWithNumEntity(output.innerHTML);
+}
+function inlineStyle() {
+    const entitied = getDCSafeHtml();
+    const inlined = juice.inlineContent(entitied, themeCss.innerHTML);
+    output.innerHTML = inlined.replace(/&quot;/g, "'");
+}
+function reflectInput() {
+    const pre = getPreElem();
+    pre.style.cssText = "";
     const code = getCodeElem();
+    code.style.cssText = "";
     code.textContent = input.value === "" ? " " : input.value;
     prism.highlightElement(code);
-    return replaceWithNumEntity(pre.innerHTML);
+    inlineStyle();
 }
 async function bindGenerator() {
-    let css = await request("./static/prism.css");
-    reflectInput = () => {
-        const entitied = getDCSafeHtml();
-        pre.innerHTML = juice.inlineContent(entitied, css);
-    };
     input.addEventListener("input", reflectInput);
     reflectInput();
 }
@@ -259,6 +283,24 @@ function bindLanguages() {
         reflectInput();
     });
 }
+function bindThemes() {
+    const selectTheme = document.getElementById("theme");
+    async function reflectTheme() {
+        let css = await request("./themes/" + selectTheme.value);
+        css = css.replace(/color\s*:\s*black\s*;/g, "color: initial;");
+        css += superCss;
+        themeCss.innerHTML = css;
+        reflectInput();
+    }
+    for (const fileName of themes) {
+        const opt = document.createElement("option");
+        opt.text = fileName.replace("prism-", "").replace(".css", "");
+        opt.value = fileName;
+        selectTheme.add(opt);
+    }
+    selectTheme.addEventListener("change", reflectTheme);
+    reflectTheme();
+}
 function copyEventHandler(ev) {
     const div = getSelectedHtmlAsDiv();
     if (!div) {
@@ -271,9 +313,9 @@ function copyEventHandler(ev) {
 }
 function copyBtnHandler() {
     const range = document.createRange();
-    const code = getCodeElem();
-    range.setStartBefore(code);
-    range.setEndAfter(code);
+    const pre = getPreElem();
+    range.setStartBefore(pre);
+    range.setEndAfter(pre);
     const selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
@@ -284,7 +326,9 @@ function initialize() {
     prism.plugins.autoloader.languages_path = "./components/";
     bindGenerator();
     bindLanguages();
-    pre.addEventListener("copy", copyEventHandler);
+    bindThemes();
+    output.addEventListener("copy", copyEventHandler);
+    const copyBtn = document.getElementById("copyBtn");
     copyBtn.addEventListener("click", copyBtnHandler);
 }
 initialize();
