@@ -205,9 +205,9 @@ function getCodeElem() {
 }
 function replaceWithNumEntity(html) {
     let buf = html;
-    buf = buf.replace(/&lt;/g, "<span>&lt;</span>");
-    buf = buf.replace(/&gt;/g, "<span>&gt;</span>");
-    buf = buf.replace(/\\/g, "<span>&#92;</span>");
+    buf = buf.replace(/&lt;/g, "<span class>&lt;</span>");
+    buf = buf.replace(/&gt;/g, "<span class>&gt;</span>");
+    buf = buf.replace(/\\/g, "<span class>&#92;</span>");
     return buf;
 }
 async function request(url) {
