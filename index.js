@@ -191,6 +191,10 @@ const superCss = `
 #pre, #code {
   font-family: Consolas, 나눔고딕코딩, D2Coding, monospace;
   font-size: 0.8rem;
+}
+#code {
+  white-space: pre-wrap;
+  word-break: break-all;
 }`;
 const juice = window.juice;
 const prism = window.Prism;
